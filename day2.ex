@@ -1,3 +1,10 @@
+#Part 1
+#For each row, determine the difference between the largest value and the smallest value;
+#the checksum is the sum of all of these differences
+#Part 2
+#It sounds like the goal is to find the only two numbers in each row where one evenly divides the other
+#- that is, where the result of the division operation is a whole number.
+#They would like you to find those numbers on each line, divide them, and add up each line's result.
 defmodule Day2 do
 	@input """
 1224	926	1380	688	845	109	118	88	1275	1306	91	796	102	1361	27	995

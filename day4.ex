@@ -1,3 +1,7 @@
+#Part 1
+#Each line that has duplicate words is invalid. Count all the valid lines
+#Part 2
+#Each line that has duplicate words or an anagram is invalid. Count all the valid lines
 defmodule Day2 do
 	@input """
 bdwdjjo avricm cjbmj ran lmfsom ivsof
@@ -512,24 +516,32 @@ zzv wik iorhat qkb kjb lykdz vrce yjsjwj
 gyw xzgbi efus uuy
 hwcy ujdun bjjuvd jbdvju onnk xeyy mmp onkn qyzl
 jwfm ptjwrbl hhuv uolz adyweh qpj wxyogp igvnojq jmfw pqs fsnirby
-
-	"""
+"""
 	def part1() do
 		@input |>
 		String.split("\n", trim: true) |>
 		Enum.map(&(String.split(&1," ", trim: true))) |>
-		# Enum.filter(&(Enum.count(&1) === Enum.count(Enum.uniq(&1)))) |>
-		Enum.filter(&(Enum.count(&1) !== Enum.count(anaFilter(&1)) )) |>
-		Enum.count |>
-		IO.inspect
+		Enum.filter(&(Enum.count(&1) === Enum.count(Enum.uniq(&1)))) |>
+		Enum.filter(&(anagramsFilter(&1))) |>
+		countAndLog 
 	end
-	def anaFilter(arr) do
-		Enum.filter(arr,fn(x) -> 
-			Enum.all?(arr -- [x], fn(y) -> 
-				IO.inspect("x_#{normalize(x)}")
-				IO.inspect("y_#{normalize(y)}")
-				normalize(x) !== normalize(y)
-			end) |> IO.inspect
+
+	def countAndLog(arr) do
+		arr
+		|> Enum.count
+		|> IO.inspect
+		arr
+	end
+
+	def anagramsFilter(arr) do
+		arr |>
+		Enum.reduce_while(false,fn(x,_acc) -> 
+			cond do
+			Enum.any?(arr -- [x], fn(y) -> 
+				normalize(x) == normalize(y)
+			end) === true -> {:halt, false}
+				true -> {:cont, true}
+			end
 		end)
 	end
 	def normalize(str) do
