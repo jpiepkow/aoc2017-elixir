@@ -1,4 +1,19 @@
 defmodule Day7 do
+@sample """
+pbga (66)
+xhth (57)
+ebii (61)
+havc (66)
+ktlj (57)
+fwft (72) -> ktlj, cntj, xhth
+qoyq (66)
+padx (45) -> pbga, havc, qoyq
+tknk (41) -> ugml, padx, fwft
+jptl (61)
+ugml (68) -> gyxo, ebii, jptl
+gyxo (61)
+cntj (57)
+"""
 	@input """
 apcztdj (61)
 ulovosc (61) -> buzjgp, iimyluk
@@ -1079,25 +1094,88 @@ sidmmmy (44)
 qjnela (266) -> andixsk, qfsbvqe
 idfyy (51) -> vxnwq, meuyumr, oyjjdj, iqwspxd, aobgmc
 """
-
 	def part1() do
-		final = makeFinal(getKeys(@input),getValues(@input))
+		#merge input into 1 type
+		final = makeFinal(getKeys(@input),getValues(@input),getWeights(@input))
+		#convert to map for speed
 		map = toMap(final)
-		IO.inspect map
+		#get start key to do traceback
 		{startKey,val} = Enum.at(map,0)
-		getBase(map,startKey)
-		|>IO.inspect
+		#find base of tree
+		base = getBase(map,startKey)
+		# base is answer to part 1
+		#findOddBranch looks up the tree at each "wrong" step eventually passing back the key that needs changed and by how much
+		{key,val} = findOddBranch(final,base,0)
+		#get the key that needs changed and change its value
+		{_,_,w} = Enum.find(final,false,fn({k,val,weight}) -> k == key end)
+		IO.inspect(w - val)
+	end
+	#this function given a key will recursively call itself until it has its total weight of itself and all of its children
+	def getTreeWeight(map,base,weight) do
+		case Enum.find(map,false,fn({k,val,weight}) -> k == base end) do
+			{k,[],w} -> w
+			false -> weight # nothing matching so return weight to this point
+			{k,val,w} -> Enum.reduce(val,w,&(&2 + getTreeWeight(map,&1,weight)))
+		end 
+	end
+	# this function will check the children of a key for the "wrong" weight and then call itself with the new key of the "incorrect" node, eventually returning the one that needs changed and by how much
+	def findOddBranch(map,key,dif) do
+		{ky,v,w} = Enum.find(map,false,fn({k,val,weight}) -> k == key end)
+		weights =Enum.map(v,fn(x) ->
+			getTreeWeight(map,x,0)
+		end)
+		case getDifferent(weights) do
+		[{size,index}] ->
+			{common,_} = getCommon(weights)
+			findOddBranch(map,Enum.at(v,index),size - common)
+		_ -> {key,dif}
+		end
+	end
+	# this function gets the odd weight out of an array
+	def getDifferent(weights) do
+		weights |>
+		Enum.with_index |> 
+		Enum.filter(fn({x,i}) ->
+			Enum.count(Enum.filter(weights,fn(inner_x) ->
+				inner_x == x
+			end)) === 1
+		end)
+		
 	end
 
+	# this function gets the common weight out of an array
+	def getCommon(weights) do
+		common = weights |>
+		Enum.with_index |> 
+		Enum.filter(fn({x,i}) ->
+			Enum.count(Enum.filter(weights,fn(inner_x) ->
+				inner_x == x
+			end)) !== 1
+		end)
+		Enum.at(common,0)
+	end
+	# this function gets the keys from input
 	def getKeys(str) do
 		str
-		|> String.split("\n")
+		|> String.split("\n" , trim: true)
 		|> Enum.map(&(Enum.at(String.split(&1," " , trim: true),0)))
 	end
 
+	# this function gets the weights from input
+	def getWeights(str) do
+		str
+		|> String.split("\n" , trim: true)
+		|> Enum.map(fn(x) -> Regex.run(~r/\(([0-9]*)\)/,x) end )
+		|> Enum.map(fn(x) -> 
+			String.to_integer(Enum.at(x,1))
+		end)
+		
+	end
+
+	# this function gets the values from input
 	def getValues(str) do
 		str
-		|> String.split("\n")
+		|> String.split("\n" , trim: true)
 		|> Enum.map(&(Enum.at(String.split(&1,"->" , trim: true),1)))
 		|> Enum.map(fn(x) ->
 			case x do
@@ -1106,15 +1184,14 @@ idfyy (51) -> vxnwq, meuyumr, oyjjdj, iqwspxd, aobgmc
 			|> Enum.map(&(String.strip(&1)))
 		end
 		end)
-		
 	end
-
+	# this function converts list to map
 	def toMap(arr) do
-	Enum.reduce arr, %{}, fn {key,val}, acc ->
+	Enum.reduce arr, %{}, fn {key,val,weight}, acc ->
   	Map.put(acc, key, val)
 	end	
 	end
-
+	# this function recursively calls itself until it can't and then returns the base of the tree
 	def getBase(map,key) do
 		v = Enum.find(map,{:ok, key},fn({k,val}) ->
 			doesExist(val,key)
@@ -1130,14 +1207,13 @@ idfyy (51) -> vxnwq, meuyumr, oyjjdj, iqwspxd, aobgmc
 			x == val	
 		end)	
 	end
-	
-	def makeFinal(keys,values) do
+	#function to merge values to a tuple in list	
+	def makeFinal(keys,values,weights) do
 		keys 
 		|> Enum.with_index 
 		|> Enum.map(fn({x,i}) ->
-			{x,Enum.at(values,i)}
+			{x,Enum.at(values,i),Enum.at(weights,i)}
 		end)	
-		
 	end
 	
 end
