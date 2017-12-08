@@ -1083,6 +1083,7 @@ idfyy (51) -> vxnwq, meuyumr, oyjjdj, iqwspxd, aobgmc
 	def part1() do
 		final = makeFinal(getKeys(@input),getValues(@input))
 		map = toMap(final)
+		IO.inspect map
 		{startKey,val} = Enum.at(map,0)
 		getBase(map,startKey)
 		|>IO.inspect
