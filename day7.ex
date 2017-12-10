@@ -1108,7 +1108,7 @@ idfyy (51) -> vxnwq, meuyumr, oyjjdj, iqwspxd, aobgmc
 		{key,val} = findOddBranch(final,base,0)
 		#get the key that needs changed and change its value
 		{_,_,w} = Enum.find(final,false,fn({k,val,weight}) -> k == key end)
-		IO.inspect(w - val)
+		IO.inspect("Tower #{key} weight is #{w} and should be #{w - val}")
 	end
 	#this function given a key will recursively call itself until it has its total weight of itself and all of its children
 	def getTreeWeight(map,base,weight) do
