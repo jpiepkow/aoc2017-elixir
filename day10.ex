@@ -1,54 +1,52 @@
 
-require IEx;
 defmodule Day10 do
-	@sample [3,4,1,5]
-	@input [183,0,31,146,254,240,223,150,2,206,161,1,255,232,199,88]
+	use Bitwise
+	@inputPart1 [183,0,31,146,254,240,223,150,2,206,161,1,255,232,199,88]
+	@inputPart2 '183,0,31,146,254,240,223,150,2,206,161,1,255,232,199,88' ++ [17, 31, 73, 47, 23]
+
 	def part1() do
-		samp = Enum.to_list(0..255)
-		twist(samp,0,@input,0,Enum.count(samp)) |> IO.inspect
+		sample = Enum.to_list(0..255)
+		convertedSample = runTwist(sample,0,0,@inputPart2,0)
+		# Part 1
+		{[one|[two|_]],_,_} = twist(sample,0,0,@inputPart1)
+		IO.inspect(one * two)
+		# Part 2
+		chunk(convertedSample) |> Enum.map(&(shift(&1))) |> Enum.map(&(convertToHEX(&1))) |> reduceHash |> IO.inspect
 	end
 
-	def twist(list,index,[len|tail],skip,list_count) when len == list_count do
-		newList = Enum.reverse(list) |> rrotate(index + 1)
-	  IO.inspect({"step#{skip}",newList})
+	def runTwist(list,_,_,_,count) when count == 64, do: list
+	def runTwist(list,index,skip,len,count) do
+		{list,index,skip} = twist(list,index,skip,len)
+		runTwist(list,index,skip,len,count+1)
+	end
 
-		IEx.pry
-		twist(newList,findNextIndex(len + index + skip,list_count),tail,skip+1,list_count)
+	def twist(list,index,skip,[len|tail]) do
+		newList = list |> lrotate(index) |> Enum.reverse_slice(0,len) |> rrotate(index)	
+		twist(newList,findNextIndex((len + index + skip),Enum.count(list)),skip+1,tail)
 	end
-	def twist(list,index,[len|tail],skip,list_count) when (index + len) > (list_count - 1) do
-		# made up of rev + norm + rev
-		last = Enum.take(list,list_count - (len + index))
-		first = Enum.take(list,len - Enum.count(last))
-		takeValue = list_count - Enum.count(last++first)
-		mid = Enum.slice(list,Enum.count(first),takeValue)
-		rev = Enum.reverse(last ++ first)
-		newLast = Enum.take(rev,Enum.count(first))
-		newFirst = Enum.take(rev,Enum.count(last) * -1)
+	def twist(list,index,skip,[]) do
+		{list,index,skip}
+	end
 
-		IEx.pry
-	  IO.inspect({"step#{skip}",newFirst++mid++newLast})
-		twist(newFirst++mid++newLast,findNextIndex(len + index + skip,list_count),tail,skip+1,list_count)
+	def chunk(list), do: Enum.chunk(list,16)
+
+	def shift(arr) do
+		Enum.reduce(arr,0,fn(x,acc) ->
+			acc ^^^ x
+		end)
 	end
-	def twist(list,index,[len|tail],skip,list_count) when (index + len) <= (list_count - 1) do
-		IEx.pry
-	  
-		twist(Enum.reverse_slice(list,index,len),findNextIndex((len + index + skip),list_count),tail,skip+1,list_count)
-	end
-	def twist(list,_,[],_,_) do
-	 Enum.at(list,0) * Enum.at(list,1)
-	end
+
+	def convertToHEX(num) when num < 10, do: "0" <> Integer.to_string(num,16) |> String.downcase	
+	def convertToHEX(num), do: Integer.to_string(num,16) |> String.downcase	
+
+	def reduceHash(arr), do: Enum.reduce(arr,"",fn(x,acc) -> acc <> x end)
 
 	def rrotate(list,number), do: lrotate(list,(Enum.count(list) - number))
 	def lrotate(list, 0), do: list
   def lrotate([head|list], number), do: lrotate(list ++ [head], number - 1)
 	def lrotate(list, number), do: list |> Enum.reverse |> lrotate(number) |> Enum.reverse
 
-	def findNextIndex(nextIndexGuess,total) when nextIndexGuess > total do
-			findNextIndex((nextIndexGuess - total),total)
-	end
-	def findNextIndex(nextIndexGuess,total) do
-			nextIndexGuess
-	end
-	
+	def findNextIndex(nextIndexGuess,total) when nextIndexGuess > total, do: findNextIndex((nextIndexGuess - total),total)
+	def findNextIndex(nextIndexGuess,_), do: nextIndexGuess
 end
 	Day10.part1()
