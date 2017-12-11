@@ -4,34 +4,46 @@ defmodule Day6 do
 	@sample2 "ne,ne,sw,sw"
 	@sample3 "ne,ne,s,s"
 	@sample4 "se,sw,se,sw,sw"
+	@sample5 "ne,se,ne,se,ne,se"
 
 	def part1() do
 		moves = @input |> parseInput
-		{{x,y},{distance,at},steps} = getCoordinates({0,0},moves,{0,0},0)
-		IO.inspect "Cords: x:#{x} y:#{y}"
-		IO.inspect "Largest distance away:#{distance} at step:#{at}"
-		IO.inspect("total steps:#{steps}")
-		walkSelf({0,0},{x,y})
+		{x,y} = getCoordinates({0,0},moves)
+		{_,furthest,dis} = moves |> Enum.with_index |> Enum.reduce({{0,0},{0,0},0},fn({x,i},{cord,f,d}) -> 
+			cords = getCoordinates(cord,[x])
+			c = calcDistance({0,0},cords)
+			if c >= d do
+			 {cords,cords,c}
+		  else
+			 {cords,f,d}
+			end
+		end)
+		
+		fur = walkSelf({0,0},furthest)
+		stp = walkSelf({0,0},{x,y}) |> IO.inspect
+		IO.inspect "Child Cords: x:#{x} y:#{y}"
+		IO.inspect "Quickest path to child is #{stp} steps"
+		IO.inspect "Largest distance away:#{dis} would take #{fur} steps to reach"
+
 	end
-	def parseInput(input), do: input |> String.split(",")
+	def parseInput(input), do: input |> String.split(",", trim: true)
 	def walkSelf(myCords,targetCords,steps \\ 0)
 	
 	def walkSelf(myCords,targetCords,steps) when myCords == targetCords do
-		IO.inspect({myCords,steps})
 		steps
 	end
 	def walkSelf({x,y},{targetX,targetY}, steps) do
 			{direction,cords,_} = ["n","ne","nw","s","se","sw"]		
-			|> Enum.map(&({&1,getCoordinates({x,y},[&1],{0,0},0)}))
+			|> Enum.map(&({&1,getCoordinates({x,y},[&1])}))
 			|> testDirections({x,y},{targetX,targetY})
-			IO.inspect("move: #{direction}")
 			walkSelf(cords,{targetX,targetY},steps + 1)
 	end
+
 	def testDirections(options,{myX,myY},{x,y}) do
 		options
 		|> Enum.reduce({"",{0,0},10000000},fn({moveDir,{moveX,moveY}},{direction,c,difference}) -> 
 			calcluatedDif = calcDistance({moveX,moveY},{x,y})
-				if  calcluatedDif <= difference do
+				if  calcluatedDif < difference do
 					{moveDir,{moveX,moveY},calcluatedDif}	
 				else 	
 					{direction,c,difference}
@@ -42,68 +54,13 @@ defmodule Day6 do
 	def calcDistance({myX,myY},{targetX,targetY}) do
 		:math.pow(targetX - myX,2) + :math.pow(targetY - myY,2) |> :math.sqrt
 	end
-	def getCoordinates({x,y},["n" | tail],{dif,at},steps) do
-		d = if calcDistance({0,0},{x,y}) > dif do
-			IO.inspect({calcDistance({0,0},{x,y}),steps})
-			{calcDistance({0,0},{x,y}),steps}			
-		else 
-			{dif,at}
-		end
-	 getCoordinates({x,y + 1},tail,d,steps+1)
-	end
-	def getCoordinates({x,y},["ne" | tail],{dif,at},steps) do
-		d = if calcDistance({0,0},{x,y}) > dif do
-			IO.inspect({calcDistance({0,0},{x,y}),steps})
-			{calcDistance({0,0},{x,y}),steps}			
-		else 
-			{dif,at}
-		end
-	 getCoordinates({x + 0.5,y + 0.5},tail,d,steps+1)
-	end
-	def getCoordinates({x,y},["nw" | tail],{dif,at},steps) do
-		d = if calcDistance({0,0},{x,y}) > dif do
-			IO.inspect({calcDistance({0,0},{x,y}),steps})
-			{calcDistance({0,0},{x,y}),steps}			
-		else 
-			{dif,at}
-		end
-	 getCoordinates({x - 0.5,y + 0.5},tail,d,steps+1)
-	end
-	def getCoordinates({x,y},["s" | tail],{dif,at},steps) do
-		d = if calcDistance({0,0},{x,y}) > dif do
-			IO.inspect({calcDistance({0,0},{x,y}),steps})
-			{calcDistance({0,0},{x,y}),steps}			
-		else 
-			{dif,at}
-		end
-	 getCoordinates({x,y - 1},tail,d,steps+1)
-	end
-	def getCoordinates({x,y},["se" | tail],{dif,at},steps) do
-		d = if calcDistance({0,0},{x,y}) > dif do
-			IO.inspect({calcDistance({0,0},{x,y}),steps})
-			{calcDistance({0,0},{x,y}),steps}			
-		else 
-			{dif,at}
-		end
-	 getCoordinates({x + 0.5,y - 0.5},tail,d,steps+1)
-	end
-	def getCoordinates({x,y},["sw" | tail],{dif,at},steps) do
-		d = if calcDistance({0,0},{x,y}) > dif do
-			IO.inspect({calcDistance({0,0},{x,y}),steps})
-			{calcDistance({0,0},{x,y}),steps}			
-		else 
-			{dif,at}
-		end
-	 getCoordinates({x - 0.5,y - 0.5},tail,d,steps+1)
-	end
-	def getCoordinates(cords,[],{dif,at},steps) do 
-		d = if calcDistance({0,0},cords) > dif do
-			IO.inspect({calcDistance({0,0},cords),steps})
-			{calcDistance({0,0},cords),steps}			
-		else 
-			{dif,at}
-		end
-		{cords,d,steps}
-	end
+	
+	def getCoordinates({x,y},["n" | tail]), do: getCoordinates({x,y + 2},tail)
+	def getCoordinates({x,y},["ne" | tail]), do: getCoordinates({x + 1,y + 1},tail)
+	def getCoordinates({x,y},["nw" | tail]), do: getCoordinates({x - 1,y + 1},tail)
+	def getCoordinates({x,y},["s" | tail]), do: getCoordinates({x,y - 2},tail)
+	def getCoordinates({x,y},["se" | tail]), do: getCoordinates({x + 1,y - 1},tail)
+	def getCoordinates({x,y},["sw" | tail]), do: getCoordinates({x - 1,y - 1},tail)
+	def getCoordinates(cords,[]), do: cords
 end
 Day6.part1()
