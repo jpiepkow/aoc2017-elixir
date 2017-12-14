@@ -46,17 +46,11 @@ defmodule Day13 do
 96: 18
 98: 18
 """
-@sample """
-0: 3
-1: 2
-4: 4
-6: 4
-"""
 	def part1() do
-		@input |> parseInput |> runDelay(0) |> IO.inspect
+		# @input |> parseInput |> runDelay(0) |> IO.inspect
 		@input |> parseInput |> findFreeRun(0,100) |> IO.inspect
 	end
-	def findFreeRun(_,count,0), do: count - 1
+	def findFreeRun(_,count,false), do: count - 1
 	def findFreeRun(input,count,_), do: findFreeRun(input,count + 1,runDelayShortCircuit(input,count))
 
 	def runDelay(input,delay) do 
@@ -71,11 +65,8 @@ defmodule Day13 do
 
 	def runDelayShortCircuit(input,delay) do 
 		input |> 
-		Enum.reduce_while(0,fn({x,y},sum) -> 
-			case rem(delay + x, 2 * (y - 1)) == 0 do 
-				true -> {:halt,1}
-				false -> {:cont,sum}
-			end 
+		Enum.any?(fn({x,y}) -> 
+			rem(delay + x, 2 * (y - 1)) == 0
 		end) 
 	end
 
