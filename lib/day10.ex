@@ -41,9 +41,9 @@ defmodule Day10 do
 			acc ^^^ x
 		end)
 	end
-
-	def convertToHEX(num) when num < 10, do: "0" <> Integer.to_string(num,16) |> String.downcase	
-	def convertToHEX(num), do: Integer.to_string(num,16) |> String.downcase	
+	def convertToHEX(num) do
+	 Integer.to_string(num,16) |> String.downcase	 |> String.pad_leading(2,"0")
+	end
 
 	def reduceHash(arr), do: Enum.reduce(arr,"",fn(x,acc) -> acc <> x end)
 
