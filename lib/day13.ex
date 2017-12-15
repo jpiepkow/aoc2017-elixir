@@ -76,4 +76,4 @@ defmodule Day13 do
 		end)
 	end
 end
-	Day13.part1()
+	# Day13.part1()

@@ -2026,4 +2026,4 @@ defmodule Day6 do
 	def findTotalGroups(input), do: input |> Map.keys |> Enum.map(&(findGroups(input,&1))) |> findUnique
 	def findUnique(arr), do: arr |> Enum.map(&(Enum.sort(&1))) |> Enum.map(&(Enum.uniq(&1))) |> Enum.uniq |> Enum.count
 end
-Day6.part1()
+# Day6.part1()

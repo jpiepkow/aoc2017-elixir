@@ -52,4 +52,4 @@ defmodule Day6 do
 		end
 	end
 end
-Day6.part1()
+# Day6.part1()

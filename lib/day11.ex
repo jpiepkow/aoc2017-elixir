@@ -1,4 +1,4 @@
-defmodule Day6 do
+defmodule Day11 do
 	@input "ne,n,ne,se,se,ne,se,s,s,nw,s,s,sw,nw,ne,n,sw,sw,sw,se,se,se,ne,se,sw,sw,nw,sw,nw,sw,nw,sw,nw,n,n,nw,nw,s,s,nw,n,n,n,ne"
 	@sample1 "ne,ne,ne"
 	@sample2 "ne,ne,sw,sw"
@@ -63,4 +63,4 @@ defmodule Day6 do
 	def getCoordinates({x,y},["sw" | tail]), do: getCoordinates({x - 1,y - 1},tail)
 	def getCoordinates(cords,[]), do: cords
 end
-Day6.part1()
+# Day11.part1()

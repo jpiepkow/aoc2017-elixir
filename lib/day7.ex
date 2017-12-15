@@ -1217,7 +1217,7 @@ idfyy (51) -> vxnwq, meuyumr, oyjjdj, iqwspxd, aobgmc
 	end
 	
 end
-	Day7.part1()
+	# Day7.part1()
 
 
 

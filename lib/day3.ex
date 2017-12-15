@@ -85,4 +85,4 @@ defmodule Day3 do
 	end
 
 end
-	Day3.part1()
+	# Day3.part1()

@@ -14,6 +14,11 @@ defmodule Day10 do
 		# Part 2
 		chunk(convertedSample) |> Enum.map(&(shift(&1))) |> Enum.map(&(convertToHEX(&1))) |> reduceHash |> IO.inspect
 	end
+	def hash(str) do
+		hashString = str++[17, 31, 73, 47, 23]
+		convertedSample = runTwist(Enum.to_list(0..255),0,0,hashString,0)
+		chunk(convertedSample) |> Enum.map(&(shift(&1))) |> Enum.map(&(convertToHEX(&1))) |> reduceHash
+	end
 
 	def runTwist(list,_,_,_,count) when count == 64, do: list
 	def runTwist(list,index,skip,len,count) do
@@ -50,4 +55,4 @@ defmodule Day10 do
 	def findNextIndex(nextIndexGuess,total) when nextIndexGuess > total, do: findNextIndex((nextIndexGuess - total),total)
 	def findNextIndex(nextIndexGuess,_), do: nextIndexGuess
 end
-	Day10.part1()
+	# Day10.part1()

@@ -23,4 +23,4 @@ defmodule Day9 do
 	# def parse([_|t],{groupOutstanding,isIgnore,false,totalGroup}), do: parse(t,{groupOutstanding,isIgnore,false,totalGroup})
 	# def parse([],{_,_,_,totalGroup}), do: totalGroup
 end
-	Day9.part1()
+	# Day9.part1()
