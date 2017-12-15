@@ -1,4 +1,12 @@
 
+defmodule Benchmark do
+  def measure(function) do
+    function
+    |> :timer.tc
+    |> elem(0)
+    |> Kernel./(1_000_000)
+  end
+end
 defmodule Day14 do
 	require Day10
 	use Bitwise
@@ -11,16 +19,17 @@ defmodule Day14 do
 		end)	 |> Enum.reduce(0,&(&1+&2))
 	end
 	def part2() do
-		0..127 |> Enum.with_index
+		arrToUse = 0..127 |> Enum.with_index
 		|> Enum.map(fn({_,i}) -> 
-				Day10.hash(@inputPart2 ++ '-#{i}') |> IO.inspect |> hexToBin
+				Day10.hash(@inputPart2 ++ '-#{i}') |> hexToBin
 		end) 
-		|> convertToMaps
+		Benchmark.measure(fn -> 
+		convertToMaps(arrToUse)
 		|> fGWrap(0,0,0,127)
 		|> reduceToArray
-		|> IO.inspect
 		|> countGroups
-		|> IO.inspect
+		end) |> IO.inspect
+		
 	end
 	def convertToMaps(arr) do
 		arr 
@@ -31,7 +40,7 @@ defmodule Day14 do
 		arr |> Enum.map(fn({x,i}) -> {i,x} end)
 	end
 	#BASE CASE
-	def fGWrap(map,row,col,count,gridSize) when row >= gridSize and col > gridSize do
+	def fGWrap(map,row,col,_,gridSize) when row >= gridSize and col > gridSize do
 		map
 	end
 	def fGWrap(map,row,col,count,gridSize) when col > gridSize do
@@ -45,7 +54,7 @@ defmodule Day14 do
 	# actual logic of find group
 	def findGroups(map,row,col,count) do
 
-		{:ok,{cVal,_,_}} = current = getFromMap(map,row,col)
+		{:ok,{cVal,_,_}} = getFromMap(map,row,col)
 		left = getFromMapWrap(map,row,col - 1,cVal)
 		right = getFromMapWrap(map,row,col + 1,cVal)
 		up = getFromMapWrap(map,row - 1,col,cVal)
@@ -60,10 +69,10 @@ defmodule Day14 do
 		shouldRecurs(down,count)
 		# findGroups(row,col+1,count+1)
 	end
-	def shouldRecurs(map,{:ok,{val,row,col}},count) do
+	def shouldRecurs(map,{:ok,{_,row,col}},count) do
 		findGroups(map,row,col,count)	
 	end
-	def shouldRecurs(map,{:error,{val,row,col}},count) do
+	def shouldRecurs(map,{:error,_},_) do
 		map	
 	end
 	def getFromMapWrap(map,row,col,current) do
@@ -76,7 +85,7 @@ defmodule Day14 do
 	def compareVals({val,row,col},current) when val === current do
 		{:ok,{val,row,col}}	
 	end
-	def compareVals({val,row,col},current) do
+	def compareVals({val,row,col},_) do
 		{:error,{val,row,col}}	
 	end
 	def getFromMap(map,row,col) do
@@ -103,8 +112,8 @@ defmodule Day14 do
 	end
 	def reduceToArray(map) do
 		Map.to_list(map) |>
-		Enum.map(fn({i,map}) -> 
-			Map.to_list(map) |> Enum.map(&(returnGroup(&1)))
+		Enum.map(fn({_,map}) -> 
+			Map.to_list(map) |> Enum.filter(&(filterGroup(&1))) |>  Enum.map(&(returnGroup(&1)))
 		end)
 	end
 	def countGroups(arr) do
@@ -112,7 +121,10 @@ defmodule Day14 do
 	Enum.reduce([],&(&1 ++ &2))	
 	|> Enum.uniq |> Enum.count
 	end
-	def returnGroup({i,{val,group}}) do
+	def filterGroup({_,{val,_}}) do
+		val === "1"
+	end
+	def returnGroup({_,{_,group}}) do
 		group
 	end
 	def sum(arr) do
@@ -121,15 +133,16 @@ defmodule Day14 do
 		end)
 	end
 end
+	Benchmark.measure(fn -> Day14.part2() end)
 # Day14.part1() |> IO.inspect
-sample = [[1,0,1,1,1],
-		      [1,0,0,0,1],
-		      [1,0,1,0,1],
-		      [1,0,0,0,1],
-		      [1,1,1,1,1]]
-		Day14.convertToMaps(sample) 
-		|> Day14.fGWrap(0,0,0,4)
-		|> Day14.reduceToArray
-		|> IO.inspect
-		|> Day14.countGroups
-		|> IO.inspect
+# sample = [[1,0,1,1,1],
+# 		      [1,0,0,0,1],
+# 		      [1,0,1,0,1],
+# 		      [1,0,0,0,1],
+# 		      [1,1,1,1,1]]
+# 		Day14.convertToMaps(sample) 
+# 		|> Day14.fGWrap(0,0,0,4)
+# 		|> Day14.reduceToArray
+# 		|> IO.inspect
+# 		|> Day14.countGroups
+# 		|> IO.inspect
