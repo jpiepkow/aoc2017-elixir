@@ -11,18 +11,15 @@ defmodule Day15 do
 	end
 	def part2() do
 		{a,b} = @input
-		nums1 = genNumbersStream(a,16807) |> streamFilter(&(rem(&1,4) === 0)) 
-		nums2 = genNumbersStream(b,48271) |> streamFilter(&(rem(&1,8) === 0)) 
+		nums1 = genNumbersStream(a,16807) |> Stream.filter(&(rem(&1,4) === 0))
+		nums2 = genNumbersStream(b,48271) |> Stream.filter(&(rem(&1,8) === 0))
 		Stream.zip(nums1,nums2) |> Stream.take(5_000_000) |>  Stream.filter(&compare/1) |> Enum.to_list |> Enum.count |> IO.inspect
-	end
-	def streamFilter(stream,func) do
-		Stream.filter(stream,&(func.(&1)))
 	end
 	def binary_tail(number) do
     number &&& 65535
 	end
 	def genNumbersStream(startingNums,val) do
-		stream = Stream.unfold(startingNums,fn(acc) ->
+		Stream.unfold(startingNums,fn(acc) ->
 			v = rem(acc*val,2147483647)	
 			{v,v}
 		end)
