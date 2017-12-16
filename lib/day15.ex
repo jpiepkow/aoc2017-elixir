@@ -1,40 +1,33 @@
 
 defmodule Day15 do
-	# {a,b}
 	use Bitwise
 @input {699,124}
 @sample {65,8921}
 	def part1() do
-		genNumbersStream(@input) |> Stream.take(40_000_000) |> Stream.filter(&compare/1) |> Enum.to_list |> length
+		{a,b} = @input
+		nums1 = genNumbersStream(a,16807) 
+		nums2 = genNumbersStream(b,48271) 
+		Stream.zip(nums1,nums2) |> Stream.take(40_000_000) |>  Stream.filter(&compare/1) |> Enum.to_list |> Enum.count |> IO.inspect
 	end
 	def part2() do
-
+		{a,b} = @input
+		nums1 = genNumbersStream(a,16807) |> streamFilter(&(rem(&1,4) === 0)) 
+		nums2 = genNumbersStream(b,48271) |> streamFilter(&(rem(&1,8) === 0)) 
+		Stream.zip(nums1,nums2) |> Stream.take(5_000_000) |>  Stream.filter(&compare/1) |> Enum.to_list |> Enum.count |> IO.inspect
+	end
+	def streamFilter(stream,func) do
+		Stream.filter(stream,&(func.(&1)))
 	end
 	def binary_tail(number) do
     number &&& 65535
 	end
-	def genNumbers(startingNums) do
-		{arr,acc} = Enum.map_reduce(0..(5 - 1),startingNums,fn(x,{a,b}) ->
-		aVal = rem(a*16807,2147483647)	
-		bVal = rem(b*48271,2147483647)
-			{{aVal,bVal},{aVal,bVal}}
-		end)
-		arr
-	end
-	def genNumbersStream(startingNums) do
-		stream = Stream.unfold(startingNums,fn({a,b}) ->
-		aVal = rem(a*16807,2147483647)	
-		bVal = rem(b*48271,2147483647)
-			{{aVal,bVal},{aVal,bVal}}
+	def genNumbersStream(startingNums,val) do
+		stream = Stream.unfold(startingNums,fn(acc) ->
+			v = rem(acc*val,2147483647)	
+			{v,v}
 		end)
 	end
 	def compare({x,y}), do: binary_tail(x) == binary_tail(y)
-	def last(str) do
-		ln = String.length(str)
-		String.slice(str,(ln-16)..ln)		
-	end
-	def toBinary(val), do: val|> Integer.to_string(2)
 end
-# Day15.binary_tail(245556042) |> IO.inspect
-# Day15.binary_tail(1431495498) |> IO.inspect
-Day15.part1() |> IO.inspect
+# Day15.part2()
+# Day15.part1()
