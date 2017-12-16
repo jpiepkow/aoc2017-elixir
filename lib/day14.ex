@@ -133,7 +133,7 @@ defmodule Day14 do
 		end)
 	end
 end
-	Benchmark.measure(fn -> Day14.part2() end)
+	# Benchmark.measure(fn -> Day14.part2() end)
 # Day14.part1() |> IO.inspect
 # sample = [[1,0,1,1,1],
 # 		      [1,0,0,0,1],
